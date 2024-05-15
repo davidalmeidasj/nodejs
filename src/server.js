@@ -1,11 +1,26 @@
+require('dotenv').config();
 const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
+const http = require('http');
+const socketIo = require('socket.io');
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server); // attach socket.io to the server
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    // Example of emitting a message to all clients
+    socket.on('update menu', (menuData) => {
+        io.emit('menu updated', menuData);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
